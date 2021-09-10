@@ -157,8 +157,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     };
 
-    private boolean mLeftIsVoiceAssist;
-    private Drawable mLeftAssistIcon;
+    // private boolean mLeftIsVoiceAssist;
+    // private Drawable mLeftAssistIcon;
 
     private IntentButton mRightButton = new DefaultRightButton();
     private Extension<IntentButton> mRightExtension;
@@ -201,11 +201,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             if (host == mRightAffordanceView) {
                 label = getResources().getString(R.string.camera_label);
             } else if (host == mLeftAffordanceView) {
-                if (mLeftIsVoiceAssist) {
-                    label = getResources().getString(R.string.voice_assist_label);
-                } else {
-                    label = getResources().getString(R.string.phone_label);
-                }
+                // if (mLeftIsVoiceAssist) {
+                //    label = getResources().getString(R.string.voice_assist_label);
+                // } else {
+                label = getResources().getString(R.string.phone_label);
+                // }
             }
             info.addAction(new AccessibilityAction(ACTION_CLICK, label));
         }
@@ -389,9 +389,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
      * Set an alternate icon for the left assist affordance (replace the mic icon)
      */
     public void setLeftAssistIcon(Drawable drawable) {
-        mLeftAssistIcon = drawable;
-        updateLeftAffordanceIcon();
-    }
+    //    mLeftAssistIcon = drawable;
+    //    updateLeftAffordanceIcon();
+    //}
 
     private void updateLeftAffordanceIcon() {
         if (!mShowLeftAffordance || mDozing) {
@@ -407,9 +407,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftAffordanceView.setContentDescription(state.contentDescription);
     }
 
-    public boolean isLeftVoiceAssist() {
-        return mLeftIsVoiceAssist;
-    }
+    //public boolean isLeftVoiceAssist() {
+    //    return mLeftIsVoiceAssist;
+    //}
 
     private boolean isPhoneVisible() {
         PackageManager pm = mContext.getPackageManager();
@@ -545,33 +545,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchLeftAffordance() {
-        if (mLeftIsVoiceAssist) {
-            launchVoiceAssist();
-        } else {
-            launchPhone();
-        }
-    }
-
-    @VisibleForTesting
-    void launchVoiceAssist() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Dependency.get(AssistManager.class).launchVoiceAssistFromKeyguard();
-            }
-        };
-        if (!mKeyguardStateController.canDismissLockScreen()) {
-            Dependency.get(Executor.class).execute(runnable);
-        } else {
-            boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
-                    && Dependency.get(TunerService.class).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
-            mStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
-                    dismissShade, false /* afterKeyguardGone */, true /* deferred */);
-        }
-    }
-
-    private boolean canLaunchVoiceAssist() {
-        return Dependency.get(AssistManager.class).canVoiceAssistBeLaunchedFromKeyguard();
+        launchPhone();
+        
     }
 
     private void launchPhone() {
@@ -652,14 +627,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mPreviewContainer.removeView(previewBefore);
         }
 
-        if (mLeftIsVoiceAssist) {
-            if (Dependency.get(AssistManager.class).getVoiceInteractorComponentName() != null) {
-                mLeftPreview = mPreviewInflater.inflatePreviewFromService(
-                        Dependency.get(AssistManager.class).getVoiceInteractorComponentName());
-            }
-        } else {
-            mLeftPreview = mPreviewInflater.inflatePreview(mLeftButton.getIntent());
-        }
+        //if (mLeftIsVoiceAssist) {
+        //    if (Dependency.get(AssistManager.class).getVoiceInteractorComponentName() != null) {
+        //        mLeftPreview = mPreviewInflater.inflatePreviewFromService(
+        //                Dependency.get(AssistManager.class).getVoiceInteractorComponentName());
+        //    }
+        //} else {
+        //    mLeftPreview = mPreviewInflater.inflatePreview(mLeftButton.getIntent());
+        //}
         if (mLeftPreview != null) {
             mPreviewContainer.addView(mLeftPreview);
             mLeftPreview.setVisibility(View.INVISIBLE);
@@ -732,9 +707,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private void setLeftButton(IntentButton button) {
         mLeftButton = button;
-        if (!(mLeftButton instanceof DefaultLeftButton)) {
-            mLeftIsVoiceAssist = false;
-        }
+        //if (!(mLeftButton instanceof DefaultLeftButton)) {
+        //    mLeftIsVoiceAssist = false;
+        //}
         updateLeftAffordance();
     }
 
@@ -783,17 +758,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public IconState getIcon() {
-            mLeftIsVoiceAssist = canLaunchVoiceAssist();
-            if (mLeftIsVoiceAssist) {
-                mIconState.isVisible = mUserSetupComplete && mShowLeftAffordance;
-                if (mLeftAssistIcon == null) {
-                    mIconState.drawable = mContext.getDrawable(R.drawable.ic_mic_26dp);
-                } else {
-                    mIconState.drawable = mLeftAssistIcon;
-                }
-                mIconState.contentDescription = mContext.getString(
-                        R.string.accessibility_voice_assist_button);
-            } else {
                 mIconState.isVisible = mUserSetupComplete && mShowLeftAffordance
                         && isPhoneVisible();
                 mIconState.drawable = mContext.getDrawable(
